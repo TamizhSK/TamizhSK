@@ -8,9 +8,10 @@
   </defs>
 
   <!-- Background -->
-  <rect id="bgRect" width="98"
+  <rect id="bgRect"
         x="0"
         y="0"
+        width="103"
         rx="17"
         height="34"
         fill="url(#bg)" />
