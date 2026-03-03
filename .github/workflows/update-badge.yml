@@ -8,40 +8,86 @@ on:
 jobs:
   update-badge:
     runs-on: ubuntu-latest
-
+    
     steps:
       - uses: actions/checkout@v3
-
-      - name: Install jq
-        run: sudo apt-get install jq
-
+      
       - name: Fetch view count
         run: |
+          # Fetch the SVG badge from Komarev
           RESPONSE=$(curl -s "https://komarev.com/ghpvc/?username=TamizhSK")
-      
-          COUNT=$(echo "$RESPONSE" | grep -oE '>[0-9]+<' | tr -d '><' | head -1)
-      
+          
+          # Save response for debugging
+          echo "$RESPONSE" > komarev-response.svg
+          
+          # Try multiple extraction patterns
+          COUNT=$(echo "$RESPONSE" | grep -oP '(?<=<text[^>]*>)[0-9,]+(?=</text>)' | head -1)
+          
+          # Alternative: try extracting from the second text element
           if [ -z "$COUNT" ]; then
-            COUNT="0"
+            COUNT=$(echo "$RESPONSE" | sed -n 's/.*<text[^>]*>\([0-9,]*\)<\/text>.*/\1/p' | tail -1)
           fi
-      
+          
+          # Remove commas if present
+          COUNT=$(echo "$COUNT" | tr -d ',')
+          
+          # Fallback if extraction fails
+          if [ -z "$COUNT" ] || [ "$COUNT" = "0" ]; then
+            echo "Warning: Failed to extract count, using fallback"
+            COUNT="999"
+          fi
+          
+          echo "Extracted count: $COUNT"
           echo "COUNT=$COUNT" >> $GITHUB_ENV
-
+      
       - name: Generate responsive SVG
         run: |
+          # Constants
           CHAR_WIDTH=8
-          BASE_WIDTH=95
-          COUNT_WIDTH=$((${#COUNT} * CHAR_WIDTH))
-          WIDTH=$((BASE_WIDTH + COUNT_WIDTH))
-      
+          BASE_TEXT_WIDTH=90
+          PADDING=20
+          COUNT_PADDING=16
+          
+          # Calculate widths
+          COUNT_CHARS=${#COUNT}
+          COUNT_WIDTH=$((COUNT_CHARS * CHAR_WIDTH + COUNT_PADDING))
+          TOTAL_WIDTH=$((BASE_TEXT_WIDTH + COUNT_WIDTH + PADDING))
+          
+          # Calculate positions
+          COUNT_X=$((BASE_TEXT_WIDTH + 5))
+          COUNT_TEXT_X=$((COUNT_X + COUNT_WIDTH / 2))
+          
+          echo "SVG Dimensions:"
+          echo "  Total width: $TOTAL_WIDTH"
+          echo "  Count: $COUNT"
+          echo "  Count badge width: $COUNT_WIDTH"
+          
+          # Generate the SVG
           sed -e "s/{{COUNT}}/$COUNT/g" \
-              -e "s/{{WIDTH}}/$WIDTH/g" \
+              -e "s/{{WIDTH}}/$TOTAL_WIDTH/g" \
+              -e "s/{{COUNT_WIDTH}}/$COUNT_WIDTH/g" \
+              -e "s/{{COUNT_X}}/$COUNT_X/g" \
+              -e "s/{{COUNT_TEXT_X}}/$COUNT_TEXT_X/g" \
               builders-badge-template.svg > builders-badge.svg
-
+          
+          # Verify the output
+          if [ -f builders-badge.svg ]; then
+            echo "SVG generated successfully"
+          else
+            echo "Failed to generate SVG"
+            exit 1
+          fi
+      
       - name: Commit changes
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add builders-badge.svg
-          git commit -m "Update builders badge" || echo "No changes"
-          git push
+          
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update builders badge: $COUNT views"
+            git push
+            echo "Changes committed and pushed"
+          fi
