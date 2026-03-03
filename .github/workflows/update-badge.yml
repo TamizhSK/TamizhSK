@@ -29,17 +29,14 @@ jobs:
 
       - name: Generate responsive SVG
         run: |
-          sed "s/{{COUNT}}/$COUNT/g" builders-badge-template.svg > temp.svg
-
           CHAR_WIDTH=8
-          BASE_WIDTH=90
+          BASE_WIDTH=95
           COUNT_WIDTH=$((${#COUNT} * CHAR_WIDTH))
           WIDTH=$((BASE_WIDTH + COUNT_WIDTH))
-
-          sed -i "1s|<svg xmlns=\"http://www.w3.org/2000/svg\">|<svg width=\"$WIDTH\" height=\"34\" viewBox=\"0 0 $WIDTH 34\" xmlns=\"http://www.w3.org/2000/svg\">|" temp.svg
-          sed -i "s/id=\"bgRect\"/id=\"bgRect\" width=\"$WIDTH\"/" temp.svg
-
-          mv temp.svg builders-badge.svg
+      
+          sed -e "s/{{COUNT}}/$COUNT/g" \
+              -e "s/{{WIDTH}}/$WIDTH/g" \
+              builders-badge-template.svg > builders-badge.svg
 
       - name: Commit changes
         run: |
