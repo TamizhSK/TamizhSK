@@ -1,38 +1,50 @@
-<svg width="140" height="34" viewBox="0 0 140 34" xmlns="http://www.w3.org/2000/svg">
+name: Update Builders Badge
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
 
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#161b22"/>
-      <stop offset="100%" stop-color="#0d1117"/>
-    </linearGradient>
-  </defs>
-
-  <!-- Background -->
-  <rect id="bgRect"
-        x="0"
-        y="0"
-        width="103"
-        rx="17"
-        height="34"
-        fill="url(#bg)" />
-
-  <!-- Dot -->
-  <circle cx="18" cy="17" r="5" fill="#3fb950">
-    <animate attributeName="opacity"
-             values="0.5;1;0.5"
-             dur="2.2s"
-             repeatCount="indefinite"/>
-  </circle>
-
-  <!-- Text -->
-  <text x="36"
-        y="21"
-        font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial"
-        font-size="13">
-
-    <tspan fill="#9da7b3">builders</tspan>
-    <tspan dx="6" fill="#e6edf3">9</tspan>
-
-  </text>
-
-</svg>
+jobs:
+  update-badge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Fetch view count
+        run: |
+          # Fetch the SVG badge from Komarev
+          RESPONSE=$(curl -s "https://komarev.com/ghpvc/?username=TamizhSK")
+          
+          # Extract the count from the SVG text element
+          # The SVG contains something like: <text ...>123</text>
+          COUNT=$(echo "$RESPONSE" | grep -oP '(?<=<text[^>]*>)[0-9]+(?=</text>)' | head -1)
+          
+          # Fallback if extraction fails
+          if [ -z "$COUNT" ]; then
+            echo "Failed to extract count, using fallback"
+            COUNT="0"
+          fi
+          
+          echo "Extracted count: $COUNT"
+          echo "COUNT=$COUNT" >> $GITHUB_ENV
+      
+      - name: Generate responsive SVG
+        run: |
+          CHAR_WIDTH=8
+          BASE_WIDTH=95
+          COUNT_WIDTH=$((${#COUNT} * CHAR_WIDTH))
+          WIDTH=$((BASE_WIDTH + COUNT_WIDTH))
+          
+          echo "Generating SVG with width: $WIDTH and count: $COUNT"
+          
+          sed -e "s/9/$COUNT/g" \
+              -e "s/103/$WIDTH/g" \
+              builders-badge-template.svg > builders-badge.svg
+      
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add builders-badge.svg
+          git diff --staged --quiet || git commit -m "Update builders badge: $COUNT views"
+          git push
