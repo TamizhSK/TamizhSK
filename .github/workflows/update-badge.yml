@@ -24,24 +24,31 @@ jobs:
           COUNT="$COUNT"
           LABEL="builders"
       
-          # Estimate width (8px per char + padding)
           COUNT_LEN=${#COUNT}
-          TOTAL_LEN=$((COUNT_LEN + 8))
-          WIDTH=$((TOTAL_LEN * 8 + 40))
+          LABEL_LEN=${#LABEL}
       
+          # Character width approximation for system font (~7px)
+          LABEL_WIDTH=$((LABEL_LEN * 7))
+          COUNT_WIDTH=$((COUNT_LEN * 8))
+      
+          PADDING=60
+          WIDTH=$((LABEL_WIDTH + COUNT_WIDTH + PADDING))
+      
+          # Replace count
           sed "s/{{COUNT}}/$COUNT/g" builders-badge-template.svg > temp.svg
       
-          # Insert dynamic width + viewBox
+          # Inject width + viewBox
           sed -i "1s|<svg xmlns=\"http://www.w3.org/2000/svg\">|<svg width=\"$WIDTH\" height=\"34\" viewBox=\"0 0 $WIDTH 34\" xmlns=\"http://www.w3.org/2000/svg\">|" temp.svg
-      
-          # Position count dynamically
-          COUNT_X=$((WIDTH - 28))
-          sed -i "s/id=\"count\"/id=\"count\" x=\"$COUNT_X\"/" temp.svg
       
           # Resize background
           sed -i "s/id=\"bgRect\"/id=\"bgRect\" width=\"$WIDTH\"/" temp.svg
       
+          # Position count properly with spacing
+          COUNT_X=$((LABEL_WIDTH + 50))
+          sed -i "s/id=\"count\"/id=\"count\" x=\"$COUNT_X\"/" temp.svg
+      
           mv temp.svg builders-badge.svg
+          
       - name: Commit changes
         run: |
           git config user.name "github-actions"
