@@ -11,6 +11,7 @@
   <rect id="bgRect"
         x="0"
         y="0"
+        width="{{WIDTH}}"
         rx="17"
         height="34"
         fill="url(#bg)" />
