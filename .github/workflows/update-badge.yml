@@ -17,12 +17,14 @@ jobs:
 
       - name: Fetch view count
         run: |
-          COUNT=$(curl -s "https://komarev.com/ghpvc/?username=TamizhSK&format=json" | jq -r '.count')
-
-          if [ -z "$COUNT" ] || [ "$COUNT" = "null" ]; then
+          RESPONSE=$(curl -s "https://komarev.com/ghpvc/?username=TamizhSK")
+      
+          COUNT=$(echo "$RESPONSE" | grep -oE '>[0-9]+<' | tr -d '><' | head -1)
+      
+          if [ -z "$COUNT" ]; then
             COUNT="0"
           fi
-
+      
           echo "COUNT=$COUNT" >> $GITHUB_ENV
 
       - name: Generate responsive SVG
