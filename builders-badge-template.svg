@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="{{WIDTH}}" height="34" viewBox="0 0 {{WIDTH}} 34">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#2C3E50;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#34495E;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#00001F;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#001121;stop-opacity:1" />
     </linearGradient>
   </defs>
   
@@ -10,7 +10,7 @@
   <rect width="{{WIDTH}}" height="34" rx="17" fill="url(#bg)"/>
   
   <!-- Green dot -->
-  <circle cx="18" cy="17" r="6" fill="#00D26A"/>
+  <circle cx="18" cy="17" r="6" fill="#00ED76"/>
   
   <!-- Text -->
   <text x="32" y="21" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#FFFFFF">builders</text>
