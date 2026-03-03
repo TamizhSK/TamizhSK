@@ -21,12 +21,12 @@ jobs:
 
       - name: Replace template variable
         run: |
-          sed "s/{{COUNT}}/$COUNT/g" assets/builders-badge-template.svg > assets/builders-badge.svg
+          sed "s/{{COUNT}}/$COUNT/g" builders-badge-template.svg > builders-badge.svg
 
       - name: Commit changes
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add assets/builders-badge.svg
+          git add builders-badge.svg
           git commit -m "Update builders badge" || echo "No changes"
           git push
