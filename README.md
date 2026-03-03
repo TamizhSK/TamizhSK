@@ -14,5 +14,5 @@ Always learning, always building.
 Peace :)
 
 <p align="left">
-  <img src="builders-badge.svg" />
+  <img src="builders-badge.svg" height="34" />
 </p>
