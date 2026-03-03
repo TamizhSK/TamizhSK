@@ -19,10 +19,29 @@ jobs:
           COUNT=$(curl -s "https://komarev.com/ghpvc/?username=TamizhSK&label=&color=0d1117&style=flat" | grep -oE '[0-9]+' | head -1)
           echo "COUNT=$COUNT" >> $GITHUB_ENV
 
-      - name: Replace template variable
+      - name: Generate responsive SVG
         run: |
-          sed "s/{{COUNT}}/$COUNT/g" builders-badge-template.svg > builders-badge.svg
-
+          COUNT="$COUNT"
+          LABEL="builders"
+      
+          # Estimate width (8px per char + padding)
+          COUNT_LEN=${#COUNT}
+          TOTAL_LEN=$((COUNT_LEN + 8))
+          WIDTH=$((TOTAL_LEN * 8 + 40))
+      
+          sed "s/{{COUNT}}/$COUNT/g" builders-badge-template.svg > temp.svg
+      
+          # Insert dynamic width + viewBox
+          sed -i "1s|<svg xmlns=\"http://www.w3.org/2000/svg\">|<svg width=\"$WIDTH\" height=\"34\" viewBox=\"0 0 $WIDTH 34\" xmlns=\"http://www.w3.org/2000/svg\">|" temp.svg
+      
+          # Position count dynamically
+          COUNT_X=$((WIDTH - 28))
+          sed -i "s/id=\"count\"/id=\"count\" x=\"$COUNT_X\"/" temp.svg
+      
+          # Resize background
+          sed -i "s/id=\"bgRect\"/id=\"bgRect\" width=\"$WIDTH\"/" temp.svg
+      
+          mv temp.svg builders-badge.svg
       - name: Commit changes
         run: |
           git config user.name "github-actions"
