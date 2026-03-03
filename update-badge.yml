@@ -1,0 +1,32 @@
+name: Update Builders Badge
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"  # every 6 hours
+  workflow_dispatch:
+
+jobs:
+  update-badge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Fetch view count
+        id: fetch
+        run: |
+          COUNT=$(curl -s "https://komarev.com/ghpvc/?username=TamizhSK&label=&color=0d1117&style=flat" | grep -oE '[0-9]+' | head -1)
+          echo "COUNT=$COUNT" >> $GITHUB_ENV
+
+      - name: Replace template variable
+        run: |
+          sed "s/{{COUNT}}/$COUNT/g" assets/builders-badge-template.svg > assets/builders-badge.svg
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add assets/builders-badge.svg
+          git commit -m "Update builders badge" || echo "No changes"
+          git push
