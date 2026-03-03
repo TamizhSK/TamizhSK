@@ -1,50 +1,21 @@
-name: Update Builders Badge
-on:
-  schedule:
-    - cron: "0 */6 * * *"
-  workflow_dispatch:
-
-jobs:
-  update-badge:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Fetch view count
-        run: |
-          # Fetch the SVG badge from Komarev
-          RESPONSE=$(curl -s "https://komarev.com/ghpvc/?username=TamizhSK")
-          
-          # Extract the count from the SVG text element
-          # The SVG contains something like: <text ...>123</text>
-          COUNT=$(echo "$RESPONSE" | grep -oP '(?<=<text[^>]*>)[0-9]+(?=</text>)' | head -1)
-          
-          # Fallback if extraction fails
-          if [ -z "$COUNT" ]; then
-            echo "Failed to extract count, using fallback"
-            COUNT="0"
-          fi
-          
-          echo "Extracted count: $COUNT"
-          echo "COUNT=$COUNT" >> $GITHUB_ENV
-      
-      - name: Generate responsive SVG
-        run: |
-          CHAR_WIDTH=8
-          BASE_WIDTH=95
-          COUNT_WIDTH=$((${#COUNT} * CHAR_WIDTH))
-          WIDTH=$((BASE_WIDTH + COUNT_WIDTH))
-          
-          echo "Generating SVG with width: $WIDTH and count: $COUNT"
-          
-          sed -e "s/{{COUNT}}/$COUNT/g" \
-              -e "s/{{WIDTH}}/$WIDTH/g" \
-              builders-badge-template.svg > builders-badge.svg
-      
-      - name: Commit changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add builders-badge.svg
-          git diff --staged --quiet || git commit -m "Update builders badge: $COUNT views"
-          git push
+<svg xmlns="http://www.w3.org/2000/svg" width="{{WIDTH}}" height="34" viewBox="0 0 {{WIDTH}} 34">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2C3E50;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#34495E;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="{{WIDTH}}" height="34" rx="17" fill="url(#bg)"/>
+  
+  <!-- Green dot -->
+  <circle cx="18" cy="17" r="6" fill="#00D26A"/>
+  
+  <!-- Text -->
+  <text x="32" y="21" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#FFFFFF">builders</text>
+  
+  <!-- Count badge -->
+  <rect x="{{COUNT_X}}" y="7" width="{{COUNT_WIDTH}}" height="20" rx="10" fill="#FFFFFF" opacity="0.15"/>
+  <text x="{{COUNT_TEXT_X}}" y="21" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#FFFFFF" text-anchor="middle">{{COUNT}}</text>
+</svg>
