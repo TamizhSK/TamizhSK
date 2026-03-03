@@ -12,12 +12,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install jq
+        run: sudo apt-get install jq
+
       - name: Fetch view count
         run: |
-          RESPONSE=$(curl -s "https://komarev.com/ghpvc/?username=TamizhSK")
-          COUNT=$(echo "$RESPONSE" | sed -n 's/.*>\([0-9]\+\)<.*/\1/p' | head -1)
+          COUNT=$(curl -s "https://komarev.com/ghpvc/?username=TamizhSK&format=json" | jq -r '.count')
 
-          if [ -z "$COUNT" ]; then
+          if [ -z "$COUNT" ] || [ "$COUNT" = "null" ]; then
             COUNT="0"
           fi
 
@@ -33,7 +35,6 @@ jobs:
           WIDTH=$((BASE_WIDTH + COUNT_WIDTH))
 
           sed -i "1s|<svg xmlns=\"http://www.w3.org/2000/svg\">|<svg width=\"$WIDTH\" height=\"34\" viewBox=\"0 0 $WIDTH 34\" xmlns=\"http://www.w3.org/2000/svg\">|" temp.svg
-
           sed -i "s/id=\"bgRect\"/id=\"bgRect\" width=\"$WIDTH\"/" temp.svg
 
           mv temp.svg builders-badge.svg
