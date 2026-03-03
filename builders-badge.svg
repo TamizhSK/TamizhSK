@@ -1,1 +1,21 @@
-
+<svg xmlns="http://www.w3.org/2000/svg" width="158" height="34" viewBox="0 0 158 34">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2d2d2d;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="158" height="34" rx="17" fill="url(#bg)"/>
+  
+  <!-- Green dot -->
+  <circle cx="18" cy="17" r="6" fill="#00D26A"/>
+  
+  <!-- Text -->
+  <text x="32" y="21" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#FFFFFF">builders</text>
+  
+  <!-- Count badge -->
+  <rect x="95" y="7" width="48" height="20" rx="10" fill="#FFFFFF" opacity="0.15"/>
+  <text x="119" y="21" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#FFFFFF" text-anchor="middle">1234</text>
+</svg>
