@@ -12,7 +12,3 @@ I build accessible, performant, and user-friendly interfaces using modern web te
 
 Always learning, always building.
 Peace :)
-
-<p align="left">
-  <img src="builders-badge.svg" height="34" />
-</p>
